@@ -36,7 +36,7 @@ dependencies:
   url_launcher: ^5.4.2
   connectivity: ^0.4.8+5
   cached_network_image:
-  
+  material_design_icons_flutter: 4.0.5145
   
 
 dev_dependencies:
