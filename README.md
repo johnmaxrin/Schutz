@@ -8,4 +8,3 @@ Version 1.0.2 is the pre launch version, all the updations will be made new brac
 
 - Contact [Seventy3 Inc](https://seventy3.tech)
 - Email [info@seventy3.tech]()
-28284211dns.
