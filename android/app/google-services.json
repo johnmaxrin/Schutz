@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "578231051663",
+    "firebase_url": "https://schutz-60b36t.firebaseio.com",
+    "project_id": "schutz-60b36t",
+    "storage_bucket": "schutz-60b36t.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578231051663:android:acdcd88ee4387ba7f417fa",
+        "android_client_info": {
+          "package_name": "com.example.shutz_ui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "578231051663-ho465oi6d58int5ncvbgu63bochf3jdd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shutz_ui",
+            "certificate_hash": "4e5b6e127f5d97e1ce3b1c44207d0ca74e06d6a7"
+          }
+        },
+        {
+          "client_id": "578231051663-1b0ub1c0od1ffuqt1i4c8logfk2jampl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjpC3PlPjia6-H4c9jgKplCvcfl1AwK5U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "578231051663-1b0ub1c0od1ffuqt1i4c8logfk2jampl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
