@@ -14,7 +14,7 @@ class _homev3_sub_widState extends State<homev3_sub_wid> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Firestore.instance.collection('Trending').snapshots(),
+      stream: Firestore.instance.collection('jobs').snapshots(),
       builder: (BuildContext ctx,AsyncSnapshot<QuerySnapshot> snap){
           if(!snap.hasData)
           {
@@ -52,8 +52,11 @@ class _homev3_listState extends State<homev3_list> {
              imageUrl: widget.data[index].data['image'],
              imageBuilder: (ctx,img)=>GestureDetector(
 
-                            onTap: (){
-                              Dialogues().gigone(context);
+                            onTap: () async{
+                              Navigator.pushNamed(context, '/loading');
+                              QuerySnapshot query = await Firestore.instance.collection('jobs').document(widget.data[index].data['uid']).collection('sub').getDocuments(); 
+                              Navigator.pop(context);
+                              Dialogues().gigone(context,widget.data[index].data['name'],query);
                             },
 
                             child: Container(
@@ -67,10 +70,10 @@ class _homev3_listState extends State<homev3_list> {
                        width: 350,
                        child: Stack(
                          children: <Widget>[
-                           Positioned(
+                            Positioned(
                              bottom: 40,
                              right: 35,
-                             child: Text('GARDEN WORKS',style: TextStyle(fontSize: 30.0,color: Colors.white,fontWeight: FontWeight.w300),)),
+                             child: Text(widget.data[index].data['name'].toString().toUpperCase(),style: TextStyle(fontSize: 30.0,color: Colors.white,fontWeight: FontWeight.w300),)),
 
                             Positioned(top: 20,right: 35,child: Icon(MdiIcons.checkCircle,size: 20,color: Colors.white,),),
 

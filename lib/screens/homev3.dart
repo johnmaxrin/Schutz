@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:shutz_ui/widgets/homev3_sub1.dart';
 import 'package:shutz_ui/widgets/homwv3_wid_bottom.dart';
+import 'package:shutz_ui/widgets/v3_gig_digs.dart';
 
 class home_screenv3 extends StatefulWidget {
   home_screenv3({Key key}) : super(key: key);
@@ -10,6 +13,9 @@ class home_screenv3 extends StatefulWidget {
 }
 
 class _home_screenv3State extends State<home_screenv3> {    
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +34,7 @@ class _home_screenv3State extends State<home_screenv3> {
         child: ListView(
           children: <Widget>[
             //////////////////////////////////////////PUT NAME HERE////////////////////////////////////////////////
-            DrawerHeader(child: Center(child: Text('ROBERT K SAMUEL',style: TextStyle(fontFamily: 'poppins',fontSize: 30.0,color: Colors.white),)),decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.indigo,Colors.blueAccent],stops: [0.2,1]),)),
+            SizedBox(height: 20.0),
            
             ListTile(
                onTap: (){},
@@ -37,9 +43,20 @@ class _home_screenv3State extends State<home_screenv3> {
             ),
 
             ListTile(
-               onTap: (){},
+               onTap: () async{
+                 
+                 Navigator.popAndPushNamed(context, '/mybookings');
+               },
               leading: new Icon(MdiIcons.book),
               title: Text('Bookings',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
+            ),
+
+            ListTile(
+               onTap: (){
+                 Navigator.popAndPushNamed(context, '/myrequests');
+               },
+              leading: new Icon(MdiIcons.book),
+              title: Text('Requests',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
             ),
 
             ListTile(
@@ -66,9 +83,11 @@ class _home_screenv3State extends State<home_screenv3> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
-        onPressed: (){print('Pressed');},
+        onPressed: (){
+           Dialogues().fabearn(context);
+
+        },
         tooltip: 'Work',
-        
         child: Icon(MdiIcons.currencyInr,size: 25.0,),
         elevation: 3.0,
       ),
@@ -92,7 +111,14 @@ class _home_screenv3State extends State<home_screenv3> {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       Icon(MdiIcons.home,size: 30.0,color: Colors.white70,),
-                      Icon(MdiIcons.axe,size: 30.0,color: Colors.white70,),
+                      IconButton(icon:Icon(MdiIcons.axe,size: 30.0,color: Colors.white70),
+                      
+                      onPressed: () async{
+                        Navigator.pushNamed(context, '/loading');
+                        QuerySnapshot query = await Firestore.instance.collection('jobs').getDocuments();
+                        Navigator.pop(context);
+                        Dialogues().gigzero(context,query);
+                      },),
                     ],
                   )
                 ),
@@ -159,3 +185,5 @@ class _home_screenv3State extends State<home_screenv3> {
 
     }
 }
+
+

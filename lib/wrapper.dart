@@ -1,10 +1,10 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:shutz_ui/Models/user.dart';
-import 'package:shutz_ui/screens/home_screen.dart';
 import 'package:shutz_ui/screens/homev3.dart';
 import 'package:shutz_ui/screens/login_signup.dart';
 import 'package:shutz_ui/screens/nointernet.dart';
+import 'package:shutz_ui/screens/searchres.dart';
 import 'package:shutz_ui/services/auth.dart';
 
 
@@ -43,8 +43,10 @@ class wrapper extends StatelessWidget {
 
             else{
 
+
+               // return WorkerRes();
               //return home_screenv3();
-              return nointernet();  //CHANGE HIM LATER
+             return nointernet();  //CHANGE HIM LATER
              }
           
             
