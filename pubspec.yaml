@@ -29,16 +29,18 @@ dependencies:
   country_code_picker:
   location:
   geoflutterfire:
-  flushbar: <1.9.1
+  flushbar: 
   flutter_map:
-  firebase_messaging:
+  firebase_messaging: 
   flutter_slidable: ^0.5.4
   url_launcher: ^5.4.2
-  connectivity: ^0.4.8+5
+  connectivity: 
   cached_network_image:
   material_design_icons_flutter: 4.0.5145
   razorpay_flutter: 
   intl:
+  store_redirect:
+ 
 
 
 dev_dependencies:

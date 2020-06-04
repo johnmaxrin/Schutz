@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shutz_ui/Models/user.dart';
 import 'package:shutz_ui/services/auth.dart';
  
 
 class phoneverify extends StatefulWidget {
 
-  User user;
+  FirebaseUser user;
   phoneverify({Key key,this.user}) : super(key: key);
 
   _phoneverifyState createState() => _phoneverifyState();
@@ -31,6 +31,7 @@ class _phoneverifyState extends State<phoneverify> {
 
 
     _auth.verifyPhoneNumber(
+      
       phoneNumber: phn,
       timeout: Duration(seconds: 60),
 
@@ -75,47 +76,21 @@ class _phoneverifyState extends State<phoneverify> {
           barrierDismissible: false,
           builder: (context)
           {
-            return AlertDialog(
-              title: Text('Enter the OTP Sent to your Phone Number',style: TextStyle(
-                fontSize: 18.0
-              ),),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextFormField(
-                   keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 22.0),
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                              borderSide: BorderSide(color: Colors.grey[200])
-                            ),
-
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(8)),
-                              borderSide: BorderSide(color: Colors.blueAccent)
-                            ),
-
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            
-                            
-                          ),
-                    
-                    controller: _smscode,
-                  )
-                ],
-              ),
-
-              actions: <Widget>[
-                FlatButton(
-                  color: Colors.blueAccent,
-                  child: Text('Confirm'),
-                  textColor: Colors.white,
-                  onPressed: () async {
-                    
-                    final code = _smscode.text.trim(); 
+            return CupertinoAlertDialog(
+                                          title: Text('Enter the OTP',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 23),),
+                                          content: Card(
+                                            color: Colors.transparent,
+                                            elevation: 1.0,
+                                            child: Column(
+                                              children: <Widget>[
+                                                TextField(
+                                                  controller: _smscode,
+                                                  keyboardType: TextInputType.number,
+                                                  style: TextStyle(fontSize: 23),
+                                                  decoration: InputDecoration(
+                                                   border: InputBorder.none,
+                                                    suffixIcon: IconButton(icon: Icon(Icons.send,color: Colors.blueAccent,),onPressed: () async{
+                                                                          final code = _smscode.text.trim(); 
 
                     AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationId,smsCode: code);
                     AuthResult result = await _auth.signInWithCredential(credential);
@@ -133,7 +108,7 @@ class _phoneverifyState extends State<phoneverify> {
               'phone':_user.phoneNumber
           },merge: true);
 
-          print('OUR BIG CHECHING ${widget.user.pic}');
+          print('OUR BIG CHECHING ${widget.user.displayName}');
           Navigator.pop(context);
           Navigator.pop(context);
                     }
@@ -142,10 +117,9 @@ class _phoneverifyState extends State<phoneverify> {
                       print('Error');
                     }
 
-                  },
-                )
-              ],
-            );
+                                                    }
+
+            )))])));
           }
         );
       },
@@ -268,11 +242,5 @@ class _phoneverifyState extends State<phoneverify> {
     );
   }
 }
-
-
-
-
-
-
 
 

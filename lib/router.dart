@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shutz_ui/screens/bookingreq.dart';
+import 'package:shutz_ui/screens/help.dart';
 import 'package:shutz_ui/screens/loading.dart';
 import 'package:shutz_ui/screens/login_signup.dart';
+import 'package:shutz_ui/screens/privacy.dart';
 import 'package:shutz_ui/screens/searchres.dart';
 import 'package:shutz_ui/screens/v3_workhere.dart';
 import 'package:shutz_ui/services/const.dart';
@@ -43,6 +45,13 @@ class Router{
 
       case myrequestroute:
       return CupertinoPageRoute(builder: (_)=>myrequestbuilder());
+
+      case help:
+      return CupertinoPageRoute(builder: (_)=>helpscreen());
+
+
+      case privacy:
+      return CupertinoPageRoute(builder: (_)=>privacypage());
 
 
       default:

@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 import 'package:shutz_ui/Models/bookings.dart';
 import 'package:shutz_ui/Models/user.dart';
 import 'package:shutz_ui/screens/success.dart';
@@ -16,17 +18,44 @@ class WorkerRes extends StatefulWidget {
 
 class _WorkerResState extends State<WorkerRes> {
 
-  List<dynamic> _user=[];
+  List<DocumentSnapshot> _user=[];
   int val;
+  GeoFirePoint currentloc;
   QuerySnapshot query;
 
   void fetecUsers()async {
-    query = await Firestore.instance.collection('users').where('job_title',arrayContains:'${widget.title}').getDocuments().whenComplete(()=>print('done'));
-    setState(()  {
-     _user = query.documents;
-     if(_user.length==0)
+
+    ////Current Locatiion///////////////////
+    Location loc = new Location();
+    Geoflutterfire geo = Geoflutterfire();
+    PermissionStatus granted;
+    granted = await loc.requestPermission();
+    while(granted != PermissionStatus.granted)
+    granted = await loc.requestPermission();
+    var pos = await loc.getLocation();
+    GeoFirePoint point = geo.point(latitude: pos.latitude,longitude: pos.longitude);
+    print(pos.latitude);
+    ////// Current Location Got///////////
+
+    var collectionref =  Firestore.instance.collection('users').where('job_title',arrayContains:'${widget.title}').where('status',isEqualTo: 'available');
+    double radius = 10;
+    String field = 'loc';
+    Stream<List<DocumentSnapshot>> stream = geo.collection(collectionRef: collectionref)
+                                        .within(center: point, radius: radius, field: field,strictMode: true);
+
+      stream.listen((List<DocumentSnapshot> documentList){
+        print('document size'+'${documentList.length}');
+        setState(() {
+          _user = documentList;
+          currentloc = point;
+          
+      if(documentList.length==0)
       val=0;
-    });
+        });
+      });
+
+
+
   }
 
   @override
@@ -76,7 +105,7 @@ class _WorkerResState extends State<WorkerRes> {
           onRefresh:() async {
             fetecUsers();
           } ,
-          child: workerist(context, _user,widget.title));}
+          child: workerist(context, _user,widget.title,currentloc));}
   }
 }
 
@@ -89,7 +118,7 @@ class _WorkerResState extends State<WorkerRes> {
 
 
 //////////////////// WID 1 11111111111111
-Widget workerist(context,_user,title)
+Widget workerist(context,_user,title,GeoFirePoint currentloc)
 {
   final CollectionReference bookingref=Firestore.instance.collection('bookings');
   return SafeArea(
@@ -234,7 +263,7 @@ Widget workerist(context,_user,title)
                                                                 var formatter = new DateFormat('dd-MM-yyyy');
                                                                 String date = formatter.format(now);
                                                               
-                                                                Bookings booking = Bookings.makebooking(userdata, workerdata,title , code1, code2,date);
+                                                                Bookings booking = Bookings.makebooking(userdata, workerdata,title , code1, code2,date,);
                                                                 //// CREATED OBJECT  //////
                                                                 bookingref.add(booking.tojson()).whenComplete((){Navigator.pop(context); 
                                                                 Success().successdig(context,'Booking added successfully! Manage it under booking section', 1).whenComplete((){
@@ -300,7 +329,8 @@ Widget workerist(context,_user,title)
 
                                           ////Rating 
                                            
-                                          Text(_user[index]['rating'].toString(),
+                                          Text('${_user[index]['rating'].toString()}'=='0'?'${_user[index]['rating'].toString()}'
+                      :(_user[index]['rating']/_user[index]['nrating']).toStringAsFixed(1),
                                                 style: TextStyle(fontWeight: FontWeight.w500,color: Colors.green),
                                               ),
 
@@ -309,7 +339,7 @@ Widget workerist(context,_user,title)
                                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400,color: Colors.black45),
                                               ),
 
-                                          Text('5.4 Km Away',
+                                          Text('${currentloc.distance(lng: _user[index]['loc']['geopoint'].longitude,lat: _user[index]['loc']['geopoint'].latitude)} Km away',
                                                 
                                                 style: TextStyle( fontWeight: FontWeight.w500,color: Colors.black45),
                                               ),

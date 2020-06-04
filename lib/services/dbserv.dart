@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:location/location.dart';
-import 'package:shutz_ui/Models/bookings.dart';
+import 'package:location/location.dart'; 
 import 'package:shutz_ui/Models/user.dart';
+import 'package:shutz_ui/widgets/notifications.dart';
 
 
 class DbServ
 {
-  String uid;
+  String uid; 
   DbServ({this.uid});
   final CollectionReference userref = Firestore.instance.collection('users');
   final CollectionReference jobref = Firestore.instance.collection('job_list');
@@ -28,8 +28,16 @@ class DbServ
         'email':user.email,
         'loc':null,
         'status':'Enrolled',
-        'works_completed':'0'
-       
+        'works_completed':0,
+        'balance':50.0,
+        'earnings':0.0,
+        'level':1,
+        'rating':0,
+        'nrating':0,
+        'perhr':120,
+        'job_title':[],
+        'token':'',
+        'rcnt':false
       });
   }
   // CHECK IF USER IS IN DB //
@@ -50,7 +58,7 @@ class DbServ
    Future<bool> checkphone() async{
         
         DocumentSnapshot snap=  await userref.document(uid).get();
-        
+
        if(snap.data==null)
        {
          return false;
@@ -69,18 +77,6 @@ class DbServ
         print(snap.data['phone']);
         return Future<bool>.value(true);}
 
-  }
-
-  Future<Bookings> postjob() async
-  {   
-
-  
-
-  }
-
-  Future<UserV3> getV3user(uid) async 
-  {
-      
   }
 
 
@@ -110,12 +106,19 @@ class DbServ
  {
     Location loc = new Location();
     Geoflutterfire geo = Geoflutterfire();
+    PermissionStatus granted;
+    granted = await loc.requestPermission();
+
+    while(granted != PermissionStatus.granted)
+    granted = await loc.requestPermission();
+
+
     var pos = await loc.getLocation();
     GeoFirePoint point = geo.point(latitude: pos.latitude,longitude: pos.longitude);
 
    await userref.document(uid).updateData({
      'loc':point.data
-   });
+   }).whenComplete(()=>print('Location Updated!'));
  }
 
  

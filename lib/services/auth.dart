@@ -1,11 +1,12 @@
 
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shutz_ui/Models/user.dart';
-import 'package:shutz_ui/services/dbserv.dart';
 
+ 
 class AuthServ{
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -33,7 +34,7 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseUser currentUser = await _auth.currentUser();
   assert(user.uid == currentUser.uid);
 
-  return _userfromfirebase(user);
+  return _userfromfirebase(currentUser);
   }
 
 
@@ -41,6 +42,8 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
   void signOutGoogle() async{
       
     try {
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      await Firestore.instance.collection('users').document(user.uid).updateData({'status':'not available'});
       await googleSignIn.signOut();
       return await _auth.signOut();
     } catch (error) {
@@ -50,8 +53,11 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
   }
   }
 
+  
   //CUSTOM USER MODEL // TERNARY OPERATOR //
-  User _userfromfirebase(FirebaseUser user){return user !=null?User(
+  User _userfromfirebase(FirebaseUser user) {
+    
+  return user !=null?User(
   uid: user.uid,
   phone:user.phoneNumber,
   pic: user.photoUrl,

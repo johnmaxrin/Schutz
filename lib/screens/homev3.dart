@@ -1,10 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shutz_ui/services/auth.dart';
+import 'package:shutz_ui/services/dbserv.dart';
 import 'package:shutz_ui/widgets/homev3_sub1.dart';
 import 'package:shutz_ui/widgets/homwv3_wid_bottom.dart';
+import 'package:shutz_ui/widgets/notifications.dart';
 import 'package:shutz_ui/widgets/v3_gig_digs.dart';
+
+import 'bookingreq.dart';
 
 class home_screenv3 extends StatefulWidget {
   home_screenv3({Key key}) : super(key: key);
@@ -13,7 +20,98 @@ class home_screenv3 extends StatefulWidget {
 }
 
 class _home_screenv3State extends State<home_screenv3> {    
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+    String token;
+    int checkvar = 0;
+    int checkvar1 = 0;
+    int checkvar2 = 0;
+    FirebaseUser currentuser;
+    DocumentSnapshot snapshot;
 
+    _savetoken() async{
+    currentuser = await FirebaseAuth.instance.currentUser(); 
+    token = await _firebaseMessaging.getToken();
+    snapshot = await Firestore.instance.collection('users').document(currentuser.uid).get(); 
+    
+      print(token);
+      DbServ().addtouser(currentuser.uid, token, 'token');
+}
+
+@override
+  void initState()  {
+    // TODO: implement initState
+    super.initState();
+    
+    _firebaseMessaging.configure(
+
+
+         onMessage: (Map<String,dynamic> message)async{
+              
+               {print(message);
+
+                showDialog(
+                  context: context,
+                  builder: (context){
+                    return AlertDialog(
+                          
+                          actionsOverflowDirection: VerticalDirection.up,
+                          title:  Text( message['notification']['title'],style: TextStyle(fontFamily: 'poppins',fontSize: 23),textAlign: TextAlign.center,),
+                          content: Text(message['notification']['body'],style: TextStyle(fontWeight: FontWeight.w300,fontSize: 19),),
+                          actions: <Widget>[
+                            
+                            RaisedButton(
+                              
+                              color: Colors.blueAccent,
+                              onPressed: ()=>Navigator.pop(context),
+                              child: Text('OK'),
+                            )
+                          ],
+            
+          
+                    );
+                    
+                  }
+                );
+               
+               }
+              
+            
+            
+            },
+
+
+      onLaunch: (Map<String, dynamic> message) async {
+           print(message);
+         
+       { print("onLaunch: ${message['data']['route']}");
+       Navigator.pushNamed(context, message['data']['route']);
+     }
+        
+
+        
+      },
+      onResume: (Map<String, dynamic> message) async {
+           print(message);
+      
+       print("onResume: ${message['data']['route']}");
+       Navigator.pushNamed(context, message['data']['route']);
+         }
+
+        
+      
+    );
+
+    _savetoken();
+  }
+
+void updateloc() async
+{
+FirebaseUser z1 = await FirebaseAuth.instance.currentUser();
+    setState(() {
+    currentuser = z1;
+    DbServ().updateloc(currentuser.uid);  
+    });
+}
 
 
   @override
@@ -21,12 +119,21 @@ class _home_screenv3State extends State<home_screenv3> {
     return Scaffold(
 
         appBar: AppBar(
-          elevation: 0.4,
+          elevation: 0.5,
+          backgroundColor: Colors.blueAccent,
+          
+          title: Container(height: 30, decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/work.png'))),),
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.account_circle),
+            IconButton(icon: Icon(Icons.email,color: Colors.white,),
             onPressed: (){},)
           ],
-          title: Text('Schutz',style:TextStyle(fontWeight: FontWeight.w300,fontSize: 25.0)),
+          
+          leading: Builder(
+                      builder:(ctx)=> IconButton(
+                          icon: Icon(Icons.menu,color: Colors.white,),
+                          onPressed: () => Scaffold.of(ctx).openDrawer(),
+                                ),
+          ),
         ),
         
         drawer: Drawer(
@@ -34,13 +141,7 @@ class _home_screenv3State extends State<home_screenv3> {
         child: ListView(
           children: <Widget>[
             //////////////////////////////////////////PUT NAME HERE////////////////////////////////////////////////
-            SizedBox(height: 20.0),
-           
-            ListTile(
-               onTap: (){},
-              leading: new Icon(MdiIcons.nut),
-              title: Text('Settings',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
-            ),
+            SizedBox(height: 30.0),
 
             ListTile(
                onTap: () async{
@@ -51,28 +152,21 @@ class _home_screenv3State extends State<home_screenv3> {
               title: Text('Bookings',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
             ),
 
-            ListTile(
-               onTap: (){
-                 Navigator.popAndPushNamed(context, '/myrequests');
-               },
-              leading: new Icon(MdiIcons.book),
-              title: Text('Requests',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
-            ),
 
             ListTile(
-                onTap: (){},
+                onTap: (){Navigator.popAndPushNamed(context, '/privacypage');},
               leading: new Icon(MdiIcons.lockAlert),
               title: Text('Privacy',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
             ),
 
             ListTile(
-                onTap: (){},
+                onTap: (){Navigator.popAndPushNamed(context, '/helpscreen');},
               leading: new Icon(MdiIcons.help),
               title: Text('Help',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
             ),
 
             ListTile(
-                onTap: (){},
+                onTap: (){AuthServ().signOutGoogle();},
               leading: new Icon(MdiIcons.powerOff),
               title: Text('Logout',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.w300),),
             ),
@@ -83,8 +177,17 @@ class _home_screenv3State extends State<home_screenv3> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
-        onPressed: (){
+        onPressed: ()async{
+          updateloc();
+          FirebaseUser user =await FirebaseAuth.instance.currentUser();
+          print(user.displayName);
+          bool a = await DbServ(uid: user.uid).checkphone();
+          if(a==true)
            Dialogues().fabearn(context);
+          else
+           Navigator.pushNamed(context, '/phoneconst',arguments: user);
+          
+
 
         },
         tooltip: 'Work',
@@ -110,14 +213,26 @@ class _home_screenv3State extends State<home_screenv3> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      Icon(MdiIcons.home,size: 30.0,color: Colors.white70,),
-                      IconButton(icon:Icon(MdiIcons.axe,size: 30.0,color: Colors.white70),
+                      Icon(MdiIcons.home,size: 30.0,color: Colors.white,),
+                      IconButton(icon:Icon(Icons.search,size: 30.0,color: Colors.white70),
                       
                       onPressed: () async{
+                        FirebaseUser user =await FirebaseAuth.instance.currentUser();
+                        print(user.displayName);
+                        bool a = await DbServ(uid: user.uid).checkphone();
+                        if(a==true){
                         Navigator.pushNamed(context, '/loading');
                         QuerySnapshot query = await Firestore.instance.collection('jobs').getDocuments();
                         Navigator.pop(context);
                         Dialogues().gigzero(context,query);
+                        }
+                        else
+                          Navigator.pushNamed(context, '/phoneconst',arguments: user);
+                        
+
+                       
+
+                        
                       },),
                     ],
                   )
@@ -130,8 +245,15 @@ class _home_screenv3State extends State<home_screenv3> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      Icon(MdiIcons.leaf,size: 30.0,color: Colors.white70,),
-                      Icon(MdiIcons.nut,size: 30.0,color: Colors.white70,),
+                      IconButton(icon:Icon(MdiIcons.leaf,size: 30.0,color: Colors.white70,),
+                      onPressed: (){Notificationpre().showflush(context, 'Currently not available in your city.');},
+                      ),
+                      Builder(
+                      builder:(ctx)=> IconButton(
+                          icon: Icon(MdiIcons.nut,color: Colors.white70,size: 30,),
+                          onPressed: () => Scaffold.of(ctx).openDrawer(),
+                                ),
+          ),
                     ],
                   )
                 ),
@@ -150,6 +272,7 @@ class _home_screenv3State extends State<home_screenv3> {
                child: Column(
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: <Widget>[
+
                    Container(
                      padding: EdgeInsets.only(left: 10,top: 10.0),
                      child: Text('Hire from nearby',style: TextStyle(color: Colors.black45,fontWeight: FontWeight.w500),),

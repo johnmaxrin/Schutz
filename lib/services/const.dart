@@ -16,3 +16,5 @@ const String myrequestroute='/myrequests';
 const String aboutsc='/about';
 const String workerres ='/workerres';
 const String workerdash='/workerdash';
+const String help='/helpscreen';
+const String privacy='/privacypage';

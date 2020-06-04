@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +22,8 @@ class _bookingreqscreenState extends State<bookingreqscreen> {
   String uid;
   void fetchcurrentuser() async{
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+       
     setState(() {
       uid = user.uid;
     });
@@ -40,12 +44,15 @@ class _bookingreqscreenState extends State<bookingreqscreen> {
         if(snap.connectionState==ConnectionState.waiting)
         {
           print('Loading');
-          return CircularProgressIndicator();
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator(),),
+    
+    );
         }
 
         if(snap.data.documents.length==0)
         {
-          return Text('No Bookings!');
+          return nobookingreq(1);
         }
         return bookingsshow(data: snap.data.documents,);
       },
@@ -72,63 +79,133 @@ class _bookingsshowState extends State<bookingsshow> {
           Expanded(
               child: Container(
                 decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0),topRight: Radius.circular(50))),
-                padding: EdgeInsets.only(top: 40),
+                padding: EdgeInsets.only(top: 60),
                 margin: EdgeInsets.only(top: 20.0),
           child: ListView.builder(
             itemCount: widget.data.length,
             itemBuilder: (context,index){
             return Slidable(
+              showAllActionsThreshold: 0.10,
               actionPane: SlidableDrawerActionPane(),
               actionExtentRatio: 0.17,
               
-                          child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [BoxShadow(blurRadius: 5.0,offset: Offset(0, 0),color: Colors.black12)]
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                margin: EdgeInsets.only(top:20.0,left: 30.0,right: 30.0),
-                child: Row(
+                child: GestureDetector(
                   
-                  children: <Widget>[
-                    Container(height: 70,width: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                 onTap: () async{
+                    if(widget.data[index]['completed']==false){
+                      Notificationpre().showflush(context, 'Swipe left or right to manage!');
+                    }
+
+                    else if(widget.data[index]['completed'] && !widget.data[index]['israted']){
+                      //do it here!!
+                                              showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10,sigmaY: 10),
+                                child: Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Container(height: MediaQuery.of(context).size.height/4,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(20.0)
+                                                  ),
+
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                        children: <Widget>[
+                                                          Text('Rate the worker',style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'poppins', fontSize: MediaQuery.of(context).size.height*0.028),),
+                                                          
+                                                        ],
+                                                      ),
+
+                                                      Column(
+                                                            children: <Widget>[
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                children: <Widget>[
+                                                                  topupButton('1',widget.data[index]['workeruid'],widget.data[index].documentID),
+                                                                  topupButton('2',widget.data[index]['workeruid'],widget.data[index].documentID),
+                                                                  topupButton('3',widget.data[index]['workeruid'],widget.data[index].documentID),
+                                                                  topupButton('4',widget.data[index]['workeruid'],widget.data[index].documentID),
+                                                                  topupButton('5',widget.data[index]['workeruid'],widget.data[index].documentID),
+                                                                  
+                                                                ],
+                                                              )
+                                                            ],
+                                                          )
+                                                    ],
+                                                  ),
+                                                  ),
+                              ),
+                            );
+                          }
+                        );
+                    }
+
+                    else if(widget.data[index]['israted']){
+                      Notificationpre().showflush(context, 'Already done rating');
+                    }
+                  },     
+                  
+                  child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [BoxShadow(blurRadius: 5.0,offset: Offset(0, 0),color: Colors.black12)]
+                  ),
+                                  padding: EdgeInsets.symmetric(horizontal:15),
+                                  margin: EdgeInsets.only(left: 10,right: 10,top: 15),
+                  child: Row(
+                    
+                   children: <Widget>[
+                      Container(height: 70,width: 70,
                       
-                      borderRadius: BorderRadius.circular(20.0),
-                      image: DecorationImage(image: NetworkImage(widget.data[index]['workerpic']))
-                    ),
-                    ),
-
-                    Container(
-                      width: MediaQuery.of(context).size.height*0.3,
-                      margin: EdgeInsets.only(top: 20,left: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Flexible(
-                            
-                             child: RichText(overflow: TextOverflow.ellipsis, text:TextSpan(
-                              
-                             text: widget.data[index]['workername'],style: TextStyle(fontSize: MediaQuery.of(context).size.height*0.031,color: Colors.black54,fontWeight: FontWeight.w300),
-                             ) )
-                             
-                             ),
-                          Text( widget.data[index]['jobname'],style: TextStyle(fontFamily: 'poppins', fontSize: MediaQuery.of(context).size.height*0.021,color: Colors.black54,fontWeight: FontWeight.w700),),
-                          Text( widget.data[index]['createdat'],style: TextStyle(fontSize: MediaQuery.of(context).size.height*0.021,color: Colors.indigo,fontWeight: FontWeight.w400,),),
-                        ],
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        
+                        borderRadius: BorderRadius.circular(20.0),
+                        image: DecorationImage(image: NetworkImage(widget.data[index]['workerpic']))
                       ),
-                    ),
+                      ),
 
-                    widget.data[index]['status']=='accepted'?Icon(Icons.done,color:Colors.blueAccent):
-                    widget.data[index]['status']=='waiting'?Icon(MdiIcons.watch,color:Colors.red): 
-                    widget.data[index]['status']=='rejected'?Icon(MdiIcons.close,color:Colors.red):Icon(Icons.done_all,color:Colors.blue)
-                  ],
-                ),
+                      Container(
+                        width: MediaQuery.of(context).size.height*0.3,
+                        margin: EdgeInsets.only(top: 15,left: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Flexible(
+                              
+                               child: RichText(overflow: TextOverflow.ellipsis, text:TextSpan(
+                                
+                               text: widget.data[index]['workername'],style: TextStyle(fontSize: 19,color: Colors.black54,fontWeight: FontWeight.w700,fontFamily: 'poppins'),
+                               ) )
+                               
+                               ),
+                            Text( widget.data[index]['jobname'],style: TextStyle(fontFamily: 'poppins', fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w700),),
+                            Text( widget.data[index]['createdat'],style: TextStyle(fontSize: 15,color: Colors.indigo,fontWeight: FontWeight.w400,),),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        
+                        child: widget.data[index]['status']=='accepted'?Icon(Icons.done,color:Colors.blueAccent):
+                      widget.data[index]['status']=='waiting'?Icon(MdiIcons.watch,color:Colors.red): 
+                      widget.data[index]['status']=='rejected'?Icon(MdiIcons.close,color:Colors.red):Icon(Icons.done_all,color:Colors.blue)
+                      ),
+                      
+                    ],
+                  ),
               ),
+                ),
 
 
               ////////ACTION BAR//////////////
@@ -205,12 +282,17 @@ class _bookingsshowState extends State<bookingsshow> {
                             child: Container(
                             
                             decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: widget.data[index]['status']=='completed'?Colors.black45 : Colors.red,
                             borderRadius: BorderRadius.circular(10.0)),
                             child: IconButton(icon: Icon(Icons.location_on,size: 30,color: Colors.white,),onPressed: () async{
 
-                                 GeoPoint pos = widget.data[index]['workerloc'];
-                          String googlemap = 'https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}';
+                        if(widget.data[index]['status']=='completed')
+                          Notificationpre().showflush(context, 'The work is completed, You can\'t  access.');
+
+                          else
+                          {
+                        GeoPoint pos = widget.data[index]['workerloc'];
+                        String googlemap = 'https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}';
                         if(await canLaunch(googlemap))
                         {
                           await launch(googlemap);
@@ -219,6 +301,8 @@ class _bookingsshowState extends State<bookingsshow> {
                         {
                           throw 'Error!!';
                         } 
+                          }
+
 
                             },),),
                           ),
@@ -233,10 +317,14 @@ class _bookingsshowState extends State<bookingsshow> {
                           child: Container(
                        
                           decoration: BoxDecoration(
-                          color: Colors.green,
+                          color:widget.data[index]['status']=='completed'?Colors.black45 : Colors.green,
                           borderRadius: BorderRadius.circular(10.0)),
                           child: IconButton(icon: Icon(Icons.call,size: 30,color: Colors.white,),onPressed: () async{
 
+                        if(widget.data[index]['status']=='completed')
+                          Notificationpre().showflush(context, 'The work is completed, You can\'t  access.');
+
+                          else{
                                if(await canLaunch('tel:${widget.data[index]['workerphone']}'))
                           {
                               launch('tel:${widget.data[index]['workerphone']}');
@@ -245,6 +333,9 @@ class _bookingsshowState extends State<bookingsshow> {
                           else{
                             print('Something Went Wring');
                           }
+                          }
+
+
 
                           },),),
                         ), 
@@ -299,6 +390,29 @@ class _bookingsshowState extends State<bookingsshow> {
                                       },
                                     );
                               }
+
+                              else if(widget.data[index]['status']=='completed')
+                              {
+                                      final startTime = widget.data[index]['startedat'].toDate();
+                                      final endTime =  widget.data[index]['endat'].toDate();
+                                      final diff_mn = endTime.difference(startTime).inMinutes;
+                                      var totalamt;
+
+                                      if(diff_mn>60)
+                                      {
+                                       final totalamt = 200+(diff_mn-60)*1.5;
+                                      }
+                                      else{totalamt=200;}
+
+                                     showDialog<bool>(
+                                      context: context,
+                                      builder: (context) {
+                                        return CupertinoAlertDialog(
+                                          title: Text('Amount Payable \u20b9$totalamt',style: TextStyle(fontWeight: FontWeight.w300,fontSize: 23),),
+                                        );
+                                      },
+                                    );  
+                              }
                             },
                             icon: widget.data[index]['status']=='accepted' && widget.data[index]['startverified']==false?Text('1',style:TextStyle(fontSize:30,color:Colors.white)):
                                   widget.data[index]['status']=='accepted' && widget.data[index]['startverified']==true?Text('2',style:TextStyle(fontSize:30,color:Colors.white)):
@@ -322,6 +436,34 @@ class _bookingsshowState extends State<bookingsshow> {
       ),
     );
   }
+
+    Widget topupButton(String amt,String uid,String bid) 
+  {
+      int a =  int.parse(amt);
+    return GestureDetector(
+          onTap: () async {
+              Navigator.pushNamed(context, '/loading');
+              await Firestore.instance.collection('users').document(uid).updateData({'nrating':FieldValue.increment(1),'rating':FieldValue.increment(a)}).whenComplete((){
+                Firestore.instance.collection('bookings').document(bid) .updateData({'israted':true});
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Notificationpre().showflush(context, 'Done Rating');});
+
+          },
+          child: Container(
+                margin: EdgeInsets.only(top: 10),
+                height: 50,width: 50,
+                decoration: BoxDecoration(
+                  
+                  color: amt=='1'? Colors.red : amt=='2'? Colors.orange : amt=='3'? Colors.amber: amt=='4'? Colors.greenAccent : Colors.blueAccent,
+                
+                
+                
+                shape: BoxShape.circle,boxShadow: [BoxShadow(blurRadius: 10,offset: Offset(2, 2),color: Colors.black12)]),
+                child: Center(child: Text('$amt',style:TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.white),),),
+                ),
+    );
+  }
 }
 
 
@@ -341,6 +483,7 @@ class _myrequestbuilderState extends State<myrequestbuilder> {
     String uid;
   void fetchcurrentuser() async{
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    await Firestore.instance.collection('users').document(user.uid).updateData({'rcnt':false});
     setState(() {
       uid = user.uid;
     });
@@ -355,17 +498,20 @@ class _myrequestbuilderState extends State<myrequestbuilder> {
   @override
   Widget build(BuildContext context) {    
     return StreamBuilder(
-      stream: Firestore.instance.collection('bookings').where('workeruid',isEqualTo:uid).snapshots(),   //where('useruid',isEqualTo: getuid()
+      stream: Firestore.instance.collection('bookings').where('workeruid',isEqualTo:uid).snapshots(),   
       builder: (BuildContext ctx,AsyncSnapshot<QuerySnapshot> snap2){
         if(snap2.connectionState==ConnectionState.waiting)
         {
           print('Loading');
-          return CircularProgressIndicator();
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator(),),
+    
+    );
         }
 
         if(snap2.data.documents.length==0)
         {
-          return Text('No Requests!');
+          return nobookingreq(0);
         }
 
          
@@ -399,7 +545,7 @@ class _myrequestlistState extends State<myrequestlist> {
           Expanded(
               child: Container(
                 decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0),topRight: Radius.circular(50))),
-                padding: EdgeInsets.only(top: 40),
+                padding: EdgeInsets.only(top: 60),
                 margin: EdgeInsets.only(top: 20.0),
           child: ListView.builder(
             itemCount: widget.data2.length,
@@ -408,15 +554,15 @@ class _myrequestlistState extends State<myrequestlist> {
               actionPane: SlidableDrawerActionPane(),
               actionExtentRatio: 0.17,
               
-                          child: Container(
+                child: Container(
                 height: 100,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.0),
                   boxShadow: [BoxShadow(blurRadius: 5.0,offset: Offset(0, 0),color: Colors.black12)]
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                margin: EdgeInsets.only(top:20.0,left: 30.0,right: 30.0),
+                                padding: EdgeInsets.symmetric(horizontal:15),
+                                margin: EdgeInsets.only(left: 10,right: 10,bottom: 15),
                 child: Row(
                   
                   children: <Widget>[
@@ -425,7 +571,7 @@ class _myrequestlistState extends State<myrequestlist> {
                       color: Colors.white,
                       
                       borderRadius: BorderRadius.circular(20.0),
-                      image: DecorationImage(image: NetworkImage(widget.data2[index]['workerpic']))
+                      image: DecorationImage(image: NetworkImage(widget.data2[index]['pic']))
                     ),
                     ),
 
@@ -440,12 +586,12 @@ class _myrequestlistState extends State<myrequestlist> {
                             
                              child: RichText(overflow: TextOverflow.ellipsis, text:TextSpan(
                               
-                             text: widget.data2[index]['workername'],style: TextStyle(fontSize: MediaQuery.of(context).size.height*0.031,color: Colors.black54,fontWeight: FontWeight.w300),
+                             text: widget.data2[index]['Username'],style: TextStyle(fontSize: 19,color: Colors.black54,fontWeight: FontWeight.w300),
                              ) )
                              
                              ),
-                          Text( widget.data2[index]['jobname'],style: TextStyle(fontFamily: 'poppins', fontSize: MediaQuery.of(context).size.height*0.021,color: Colors.black54,fontWeight: FontWeight.w700),),
-                          Text( widget.data2[index]['createdat'],style: TextStyle(fontSize: MediaQuery.of(context).size.height*0.021,color: Colors.indigo,fontWeight: FontWeight.w400,),),
+                          Text( widget.data2[index]['jobname'],style: TextStyle(fontFamily: 'poppins', fontSize: 15,color: Colors.black54,fontWeight: FontWeight.w700),),
+                          Text( widget.data2[index]['createdat'],style: TextStyle(fontSize: 15,color: Colors.indigo,fontWeight: FontWeight.w400,),),
                         ],
                       ),
                     ),
@@ -485,8 +631,13 @@ class _myrequestlistState extends State<myrequestlist> {
                                   RaisedButton(
                                     color: Colors.blueAccent,
                                     onPressed: ()async{
+                                      FirebaseUser user = await FirebaseAuth.instance.currentUser();
                                        Navigator.pushNamed(context, '/loading');
-                                       await Firestore.instance.collection('bookings').document(widget.data2[index].documentID).setData({'status':'rejected'},merge:true).whenComplete((){Navigator.pop(context); Navigator.pop(context);
+                                       await Firestore.instance.collection('users').document(user.uid).updateData({'status':'not available'});
+                                       await Firestore.instance.collection('bookings').document(widget.data2[index].documentID).setData({'status':'rejected'},merge:true).whenComplete((){
+                                         
+                                          
+                                         Navigator.pop(context); Navigator.pop(context);
                                        Notificationpre().showflush(context, 'Request rejected!');});
                            
                                     },
@@ -574,7 +725,9 @@ class _myrequestlistState extends State<myrequestlist> {
                                   RaisedButton(
                                     color: Colors.blueAccent,
                                     onPressed: ()async{
+                                      FirebaseUser user = await FirebaseAuth.instance.currentUser();
                                        Navigator.pushNamed(context, '/loading');
+                                       await Firestore.instance.collection('users').document(user.uid).updateData({'status':'working'});
                                        await Firestore.instance.collection('bookings').document(widget.data2[index].documentID).setData({'status':'accepted'},merge:true) .whenComplete((){Navigator.pop(context); Navigator.pop(context); Notificationpre().showflush(context, 'Request Accepted');});
                            
                                     },
@@ -585,6 +738,7 @@ class _myrequestlistState extends State<myrequestlist> {
                                    RaisedButton(
                                      color: Colors.red,
                                     onPressed: ()async{
+                                      
                                         Navigator.pop(context);
                                     },
                                     child: Text('No'),
@@ -785,9 +939,9 @@ class _myrequestlistState extends State<myrequestlist> {
 
 
                                                         Navigator.pushNamed(context, '/loading');
-                                                        await Firestore.instance.collection('bookings').document(widget.data2[index].documentID).setData({'status':'completed', 'endverified':true,'endat':DateTime.now()},merge:true).
+                                                        await Firestore.instance.collection('bookings').document(widget.data2[index].documentID).setData({'status':'completed', 'endverified':true,'endat':DateTime.now(),'completed':true},merge:true).
                                                         whenComplete((){
-                                                          Firestore.instance.collection('users').document(widget.data2[index]['workeruid']).updateData({'balance':FieldValue.increment(-(totalamt*0.1)),'earnings':FieldValue.increment(totalamt)});
+                                                          Firestore.instance.collection('users').document(widget.data2[index]['workeruid']).updateData({'balance':FieldValue.increment(-(totalamt*0.1)),'earnings':FieldValue.increment(totalamt),'works_completed':FieldValue.increment(1),'status':'not available'});
                                                           Navigator.pop(context); 
                                                           Navigator.pop(context); 
                                                           Notificationpre().showflush(context, 'Jobend Verification Success.');});
@@ -857,4 +1011,25 @@ class _myrequestlistState extends State<myrequestlist> {
       ),
     );
   }
+
+
+
 }
+
+  Widget nobookingreq(a){
+
+    return Scaffold(
+          body: Container(
+         child: Column(
+           mainAxisAlignment: MainAxisAlignment.center,
+           
+           children: <Widget>[
+              Container(
+                 height: 200.0,
+                 child: Image.asset('assets/sadchekkan.png',fit: BoxFit.contain,)),
+             Center(child: Text(a==1?'No Bookings':'No Requests',style: TextStyle(fontSize: 20.0,fontFamily: 'poppins'),),),
+           ],
+         ),
+      ),
+    ); 
+  }

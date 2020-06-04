@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shutz_ui/services/dbserv.dart';
 import 'package:shutz_ui/widgets/v3_gig_digs.dart';
 
 class homev3_sub_wid extends StatefulWidget {
@@ -10,7 +13,14 @@ class homev3_sub_wid extends StatefulWidget {
   _homev3_sub_widState createState() => _homev3_sub_widState();
 }
 
+
+
+
+
+
+
 class _homev3_sub_widState extends State<homev3_sub_wid> {
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -53,10 +63,21 @@ class _homev3_listState extends State<homev3_list> {
              imageBuilder: (ctx,img)=>GestureDetector(
 
                             onTap: () async{
+
+                              FirebaseUser user =await FirebaseAuth.instance.currentUser();
+                              print(user.displayName);
+                              DbServ().updateloc(user.uid);
+                              bool a = await DbServ(uid: user.uid).checkphone();
+                              if(a==true){
                               Navigator.pushNamed(context, '/loading');
                               QuerySnapshot query = await Firestore.instance.collection('jobs').document(widget.data[index].data['uid']).collection('sub').getDocuments(); 
                               Navigator.pop(context);
                               Dialogues().gigone(context,widget.data[index].data['name'],query);
+                              }
+                              else
+                                Navigator.pushNamed(context, '/phoneconst',arguments: user);
+
+
                             },
 
                             child: Container(
@@ -88,7 +109,7 @@ class _homev3_listState extends State<homev3_list> {
                      ),
              ),
 
-                   placeholder: (ctx,url)=>Center(child: CircularProgressIndicator(),),
+                   placeholder: (ctx,url)=>Container(height: 200,width: 350, child: Center(child: CircularProgressIndicator())),
            );
            
            

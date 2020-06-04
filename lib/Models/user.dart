@@ -37,13 +37,14 @@ class UserV3
   String status;
   List<String> jobs;
   String wrkcmp;
-  String perhr;
+  double perhr;
   double bal;
-  String rating;
+  double rating;
   String token;
-  String level;
+  int level;
   bool req;
   GeoPoint loc;
+  bool rcnt;
   
   UserV3.fromSnapshot(DocumentSnapshot data) 
   : uid = data['uid'],
@@ -54,13 +55,14 @@ class UserV3
     status = data['status'],
     jobs = List.from(data['job_title']),
     wrkcmp = data['wrkcmp'],
-    perhr = data['perhr'],
-    bal = data['balance'],
-    rating = data['rating'],
+    perhr = data['perhr'].toDouble(),
+    bal = data['balance'].toDouble(),
+    rating = data['rating'].toDouble(),
     level = data['level'],
     req = data['req'],
     token=data['token'],
-    loc = data['loc']['geopoint'];
+    loc = data['loc']['geopoint'],
+    rcnt=data['rcnt'];
   
 
 }

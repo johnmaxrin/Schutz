@@ -20,7 +20,7 @@ class Bookings
   GeoPoint userlocation;
   String code1;
   String code2;
-  String perhr;
+  double perhr;
   String workername;
   String workerphone;
   String workerpic;
@@ -36,6 +36,7 @@ class Bookings
   String amtpayable;
   String createdat;
   bool completed;
+  bool israted;
 
   Bookings({
   this.createdat,
@@ -61,6 +62,7 @@ class Bookings
   this.amtpayable,
   this.status,
   this.completed,
+  this.israted,
   });
 
 
@@ -93,6 +95,7 @@ class Bookings
   amtpayable = '0',
   timetaken = '0',
   completed = false,
+  israted = false,
   createdat = date;
 
   
@@ -122,8 +125,8 @@ class Bookings
       'timetaken':timetaken,
       'amtpayable':amtpayable,
       'createdat':createdat,
-      'completed':completed
-
+      'completed':completed,
+      'israted':israted,
     };
   }
   

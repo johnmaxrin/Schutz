@@ -41,7 +41,7 @@ class _login_signupState extends State<login_signup> {
                       
                       margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Text(
-                      'Join Schutz and do amazing stuffs! At the end, hardwork pays it off. Good Luck',
+                      'Join Work and do amazing stuffs! At the end, hardwork pays it off. Good Luck',
                       textAlign: TextAlign.center,
                       
                       style:TextStyle(color: Colors.black54, fontSize:MediaQuery.of(context).size.height * 0.02,fontFamily: 'poppins',fontWeight: FontWeight.w600,letterSpacing: 0)),
@@ -54,26 +54,20 @@ class _login_signupState extends State<login_signup> {
                       onTap: () async
                       {
 
-                          User data = await AuthServ().signInWithGoogle();
-                          
-                    if(data.uid==null){
-                     
-                      Navigator.popAndPushNamed(context, '/wrapper');
-                    } 
+                      User user = await AuthServ().signInWithGoogle();
+                    if(user.uid==null)
+                     Navigator.popAndPushNamed(context, '/wrapper');
                     
                     else{
-                      
-                        print('EVAN ANN ALLL: '+data.uid);
-                        final CollectionReference userref = Firestore.instance.collection('users');
-                        DocumentSnapshot snap =await userref.document(data.uid).get().whenComplete(()=>print('AVAN ONDO ILLEYO NN IPPAM ARIYAM'));
-                        print(snap.data);
-                        if(snap.data['name']==null){
-                          DbServ().adduser(data).whenComplete(()=>print('EVANE NAMMAL KETTI'));
+                      print('EVAN ANN ALLL: '+user.uid);
+                      final CollectionReference userref = Firestore.instance.collection('users');
+                      DocumentSnapshot snap =await userref.document(user.uid).get().whenComplete(()=>print('AVAN ONDO ILLEYO NN IPPAM ARIYAM'));
+                      print(snap.data);
+                        if(snap.data==null){
+                          DbServ().adduser(user).whenComplete(()=>print('EVANE NAMMAL KETTI'));
                           
-                        }
-                         
-                      }
-                       
+                        }    
+                    }
 
                       },
 

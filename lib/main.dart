@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarColor: Colors.blueAccent));
     return MaterialApp(
     onGenerateRoute: Router.generateRoute,
-    title: 'Schutz',
+    title: 'Work',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       primaryColor: Colors.white
